@@ -27,10 +27,7 @@ float initx, inity, initz;
 // constructor for accelerometer library
 ADXL335 acc(xInput, yInput, zInput);
 
-
 int lastOrientation = - 1; // previous orientation (for comparison)
-
-int noteToPlay = 0;
 
 // for VS1053 breakout board
 // define the pins used
@@ -44,10 +41,6 @@ int noteToPlay = 0;
 #define BREAKOUT_RESET  9      // VS1053 reset pin (output)
 #define BREAKOUT_CS     10     // VS1053 chip select pin (output)
 #define BREAKOUT_DCS    8      // VS1053 Data/command select pin (output)
-// These are the pins used for the music maker shield
-#define SHIELD_RESET  -1      // VS1053 reset pin (unused!)
-#define SHIELD_CS     7      // VS1053 chip select pin (output)
-#define SHIELD_DCS    6      // VS1053 Data/command select pin (output)
 
 // These are common pins between breakout and shield
 #define CARDCS 4     // Card chip select pin
@@ -57,6 +50,8 @@ int noteToPlay = 0;
 Adafruit_VS1053_FilePlayer musicPlayer = 
   // create breakout-example object!
   Adafruit_VS1053_FilePlayer(BREAKOUT_RESET, BREAKOUT_CS, BREAKOUT_DCS, DREQ, CARDCS);
+
+boolean justPlayedTrackOne = false;
 
 void setup() {
   Serial.begin(9600); // initialize Serial communication
@@ -69,13 +64,30 @@ void setup() {
   analogReference(EXTERNAL);
   acc.preset();
 
+  // get initial accelerometer position
   initx = acc.getGX();
   inity = acc.getGY();
   initz = acc.getGZ();
   
-  for (int i = 0; i < 14; i++){
-   noteDurations[i] = 2;
+  Serial.println("Adafruit VS1053 Simple Test");
+
+  if (! musicPlayer.begin()) { // initialise the music player
+     Serial.println(F("Couldn't find VS1053, do you have the right pins defined?"));
+     while (1);
   }
+  Serial.println(F("VS1053 found"));
+  
+   if (!SD.begin(CARDCS)) {
+    Serial.println(F("SD failed, or not present"));
+    while (1);  // don't do anything more
+  }
+  
+  // Set volume for left, right channels. lower numbers == louder volume!
+  musicPlayer.setVolume(18,18);
+
+  // If DREQ is on an interrupt pin (on uno, #2 or #3) we can do background
+  // audio playing
+  musicPlayer.useInterrupt(VS1053_FILEPLAYER_PIN_INT);  // DREQ int
 
 }
 
@@ -101,23 +113,42 @@ void loop() {
     orientation = 1;
   }
 
-  Serial.println(orientation);
+  //Serial.println(orientation);
 
-    // if not up orientation, play
+    // if not up orientation, play music
     if(orientation != 0 && orientation != -1){
-            int noteDuration = 1000/noteDurations[noteToPlay];
-            tone(13, melody[noteToPlay], noteDuration);
-    
-            //pause for the note's duration plus 30 ms:
-            delay(noteDuration +30);
-
-            noteToPlay++;
-
-            // start at beginning
-            if(noteToPlay > 14){
-              noteToPlay = 0;
-            } 
+      // alternate tracks when user just picks up shell
+      if(lastOrientation != orientation){
+         if(justPlayedTrackOne == true){
+            Serial.println("playing 2");
+            musicPlayer.startPlayingFile("track002.mp3");
+            justPlayedTrackOne = false;
+        }
+        else{
+           Serial.println("playing 1");
+          musicPlayer.startPlayingFile("track001.mp3");
+          justPlayedTrackOne = true;
+        }
+      }
+      // loop track if shell is still not in up orientation when track finishes (user is still listening)
+      else{
+        if(musicPlayer.stopped() && justPlayedTrackOne == true){
+          Serial.println("playing 1");
+            musicPlayer.startPlayingFile("track001.mp3");
+        }
+        else if(musicPlayer.stopped() && justPlayedTrackOne == false){
+          Serial.println("playing 2");
+          musicPlayer.startPlayingFile("track002.mp3");
+        }
+      }
     }
+    else{
+       Serial.println("stop");
+      musicPlayer.stopPlaying(); //stop player
+    }
+
+    // update orientation
+    lastOrientation = orientation;
 
 }
 
