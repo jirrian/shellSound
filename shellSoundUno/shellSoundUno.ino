@@ -8,7 +8,6 @@
  * Adapted code from player_simple example for Adafruit VS1053 Codec Breakout
 */
 
-#include "pitches.h"
 #include "ADXL335.h"
 
 // include SPI, MP3 and SD libraries
@@ -105,7 +104,7 @@ void loop() {
   // and are positive, then board is facing up
   
   // board facing up
-  if(abs(x - initx) <= 0.2 && abs(y - inity) <= 0.2 && abs(z - initz) <= 0.2 && x < 0 && y < 0 && z < 0){
+  if(abs(x - initx) <= 0.35 && abs(y - inity) <= 0.35 && abs(z - initz) <= 0.35 && x < 0 && y < 0 && z < 0){
     orientation = 0;
   }
   // board not facing up
@@ -113,19 +112,17 @@ void loop() {
     orientation = 1;
   }
 
-  //Serial.println(orientation);
+  Serial.println(orientation);
 
     // if not up orientation, play music
     if(orientation != 0 && orientation != -1){
       // alternate tracks when user just picks up shell
       if(lastOrientation != orientation){
          if(justPlayedTrackOne == true){
-            Serial.println("playing 2");
             musicPlayer.startPlayingFile("track002.mp3");
             justPlayedTrackOne = false;
         }
         else{
-           Serial.println("playing 1");
           musicPlayer.startPlayingFile("track001.mp3");
           justPlayedTrackOne = true;
         }
@@ -133,17 +130,14 @@ void loop() {
       // loop track if shell is still not in up orientation when track finishes (user is still listening)
       else{
         if(musicPlayer.stopped() && justPlayedTrackOne == true){
-          Serial.println("playing 1");
             musicPlayer.startPlayingFile("track001.mp3");
         }
         else if(musicPlayer.stopped() && justPlayedTrackOne == false){
-          Serial.println("playing 2");
           musicPlayer.startPlayingFile("track002.mp3");
         }
       }
     }
     else{
-       Serial.println("stop");
       musicPlayer.stopPlaying(); //stop player
     }
 
