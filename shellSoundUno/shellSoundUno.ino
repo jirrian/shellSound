@@ -82,7 +82,7 @@ void setup() {
   }
   
   // Set volume for left, right channels. lower numbers == louder volume!
-  musicPlayer.setVolume(18,18);
+  musicPlayer.setVolume(5,5);
 
   // If DREQ is on an interrupt pin (on uno, #2 or #3) we can do background
   // audio playing
@@ -100,18 +100,24 @@ void loop() {
   float y = acc.getGY();
   float z = acc.getGZ();
 
-  // if x, y, z Gvalues are close to 0 (absolute values less than 0.2), 
+  // if x, y, z Gvalues are close to intial value, 
   // and are positive, then board is facing up
+// && x < 0 && y < 0 && z < 0
   
   // board facing up
-  if(abs(x - initx) <= 0.35 && abs(y - inity) <= 0.35 && abs(z - initz) <= 0.35 && x < 0 && y < 0 && z < 0){
+  if(abs(x - initx) <= 0.35 && abs(y - inity) <= 0.35 && abs(z - initz) <= 0.35){
     orientation = 0;
   }
   // board not facing up
   else{
     orientation = 1;
   }
-
+//  Serial.print("x");
+//  Serial.print(x);
+//  Serial.print(", y");v               
+//  Serial.print(y);
+//  Serial.print(", z");
+//  Serial.println(z);
   Serial.println(orientation);
 
     // if not up orientation, play music
