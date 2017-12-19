@@ -39,7 +39,7 @@
             'showinfo': 0
           },
           events: {
-            'onReady': onPlayerReady
+            'onReady': onPlayerReady,
           }
         });
       }
@@ -48,6 +48,7 @@
       function onPlayerReady(event) {
         event.target.mute();
         event.target.playVideo();
+        event.target.setPlaybackQuality(highres);
       }
   </script>
   

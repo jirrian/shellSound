@@ -1,5 +1,5 @@
 var serial;          // variable to hold an instance of the serialport library
-var portName = '/dev/cu.wchusbserial1410';  // fill in your serial port name here
+var portName = '/dev/cu.wchusbserial14110';  // fill in your serial port name here
 
 var x,y; // accelerometer values from arduino
 var orientation, lastOrientation; // orientation from arduino (int)

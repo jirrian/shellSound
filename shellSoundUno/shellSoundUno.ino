@@ -82,7 +82,7 @@ void setup() {
   }
   
   // Set volume for left, right channels. lower numbers == louder volume!
-  musicPlayer.setVolume(5,5);
+  musicPlayer.setVolume(2,2);
 
   // If DREQ is on an interrupt pin (on uno, #2 or #3) we can do background
   // audio playing
